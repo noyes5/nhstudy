@@ -11,7 +11,8 @@
     "vite": "^5.2.0",
     "lucide-react": "^0.379.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@azure/cosmos": "^3.17.3"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.0",
