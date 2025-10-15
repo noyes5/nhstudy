@@ -2,6 +2,9 @@
   "name": "api-functions",
   "version": "1.0.0",
   "description": "Azure Functions for my SWA",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@azure/cosmos": "^4.0.0"
   }
