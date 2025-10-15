@@ -20,15 +20,15 @@ jobs:
           submodules: true
           lfs: false
 
-      # ✅ (1) 의존성 설치 단계 추가
+      # 1. 의존성 설치 단계 추가
       - name: Install dependencies
         run: npm ci
 
-      # ✅ (2) vite 실행 권한 부여
+      # 2. vite 실행 권한 부여
       - name: Fix vite permission
         run: chmod +x node_modules/.bin/vite || true
 
-      # ✅ (3) 빌드 및 배포
+      # 3. 빌드 및 배포
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
