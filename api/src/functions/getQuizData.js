@@ -1,7 +1,7 @@
 const { app } = require('@azure/functions');
 const { CosmosClient } = require("@azure/cosmos");
 
-// Cosmos DB 클라이언트는 함수 핸들러 바깥에서 한 번만 초기화하는 것이 좋습니다.
+// Cosmos DB Client initialization
 const endpoint = process.env.COSMOS_DB_ENDPOINT;
 const key = process.env.COSMOS_DB_KEY;
 const client = new CosmosClient({ endpoint, key });
@@ -18,7 +18,7 @@ app.http('getQuizData', {
             const { resource } = await container.item("quizData", "quizData").read();
             context.log("Successfully read item from Cosmos DB.");
 
-            // 성공 시, jsonBody를 사용해 JSON 응답을 보냅니다.
+            // success
             return {
                 jsonBody: resource || { quizData: [], bookmarked: [] }
             };
@@ -26,7 +26,7 @@ app.http('getQuizData', {
         } catch (err) {
             context.log.error(`Error reading from Cosmos DB: ${err.message}`);
             
-            // 실패 시, status와 body를 포함한 객체를 반환합니다.
+            // failure
             return {
                 status: 500,
                 body: `Database error: ${err.message}`
