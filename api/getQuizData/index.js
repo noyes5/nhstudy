@@ -1,8 +1,6 @@
 import { CosmosClient } from "@azure/cosmos";
 
-const endpoint = process.env.COSMOS_DB_ENDPOINT;
-const key = process.env.COSMOS_DB_KEY;
-const client = new CosmosClient({ endpoint, key });
+const client = new CosmosClient(process.env.COSMOS_DB_CONNECTION_STRING);
 
 export default async function (context, req) {
   try {
