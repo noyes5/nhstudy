@@ -1,0 +1,9 @@
+{
+  "databases": {
+    "quizdb": {
+      "connectionStringSetting": "COSMOS_DB_CONNECTION_STRING",
+      "databaseType": "CosmosDB",
+      "containerName": "reviewQuestions"
+    }
+  }
+}
