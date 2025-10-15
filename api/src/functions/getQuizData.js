@@ -1,13 +1,24 @@
-const { app } = require('@azure/functions');
+import { CosmosClient } from "@azure/cosmos";
 
-app.http('getQuizData', {
-    methods: ['GET', 'POST'],
-    authLevel: 'anonymous',
-    handler: async (request, context) => {
-        context.log(`Http function processed request for url "${request.url}"`);
+const endpoint = process.env.COSMOS_DB_ENDPOINT;
+const key = process.env.COSMOS_DB_KEY;
+const client = new CosmosClient({ endpoint, key });
 
-        const name = request.query.get('name') || await request.text() || 'world';
+export default async function (context, req) {
+  const { quizData, bookmarked } = req.body;
 
-        return { body: `Hello, ${name}!` };
-    }
-});
+  try {
+    const database = client.database("quizdb");
+    const container = database.container("reviewQuestions");
+
+    await container.items.upsert({
+      id: "quizData",
+      quizData,
+      bookmarked,
+    });
+
+    context.res = { status: 200, body: { message: "저장 성공" } };
+  } catch (err) {
+    context.res = { status: 500, body: { message: "저장 실패", error: err.message } };
+  }
+}
