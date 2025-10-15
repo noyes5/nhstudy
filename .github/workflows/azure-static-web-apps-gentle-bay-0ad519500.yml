@@ -38,7 +38,6 @@ jobs:
           action: "upload"
           app_location: "/"
           api_location: "api"
-          data_api_location: "swa-db-connections" 
           app_build_command: "npm run build"
           output_location: "dist"
 
