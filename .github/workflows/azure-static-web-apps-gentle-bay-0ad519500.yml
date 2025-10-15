@@ -19,19 +19,30 @@ jobs:
         with:
           submodules: true
 
-      # ✅ 모든 것을 이 하나의 액션에 맡깁니다.
-      - name: Build and Deploy
+      # ✅ 1단계: 의존성 설치 (vite 명령어 파일 생성)
+      - name: Install Dependencies
+        run: npm install
+
+      # ✅ 2단계: vite에게 실행 권한 부여 (가장 중요!)
+      - name: Grant Execute Permission to Vite
+        run: chmod +x node_modules/.bin/vite
+
+      # ✅ 3단계: 앱 빌드 (이제 vite가 실행됩니다)
+      - name: Build App
+        run: npm run build
+
+      # ✅ 4단계: 빌드된 결과물만 Azure에 업로드
+      - name: Deploy to Azure
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_GENTLE_BAY_0AD519500 }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          ###### 프로젝트 설정은 여기에 정확히 명시합니다 ######
-          app_location: "/"
+          ###### 중요: 빌드를 이미 수동으로 했으므로 여기서는 건너뜁니다 ######
+          app_location: "dist" # Vite 빌드 결과물 폴더
           api_location: "api"
-          output_location: "dist"
-          app_build_command: "npm run build"
+          skip_app_build: true # 앱 빌드 건너뛰기
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
