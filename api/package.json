@@ -1,13 +1,14 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "description": "",
+  "description": "Azure Functions for SWA",
   "scripts": {
     "start": "func start",
     "test": "echo \"No tests yet...\""
   },
   "dependencies": {
-    "@azure/functions": "^4.0.0"
+    "@azure/functions": "^4.0.0",
+    "@azure/cosmos": "^4.0.0"
   },
   "devDependencies": {},
   "main": "src/{index.js,functions/*.js}"
