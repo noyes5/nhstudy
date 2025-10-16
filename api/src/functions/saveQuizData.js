@@ -1,3 +1,4 @@
+// api/saveQuizData.js
 const { app } = require('@azure/functions');
 const { CosmosClient } = require("@azure/cosmos");
 
@@ -11,6 +12,7 @@ app.http('saveQuizData', {
   methods: ['POST'],
   authLevel: 'anonymous',
   handler: async (request, context) => {
+    context.log(`Http function 'saveQuizData' processed request.`);
     try {
       const { quizData, bookmarked, nickname } = await request.json();
 
@@ -18,7 +20,7 @@ app.http('saveQuizData', {
         return { status: 400, body: "닉네임이 필요합니다." };
       }
 
-      // 북마크 데이터만 닉네임별로 따로 저장
+      // 닉네임별 북마크 저장
       await container.items.upsert({
         id: `bookmark_${nickname}`,
         partitionKey: "bookmark",
@@ -26,7 +28,7 @@ app.http('saveQuizData', {
         bookmarked,
       });
 
-      // quizData는 공용 문서로 유지
+      // quizData는 공용으로 저장
       if (quizData) {
         await container.items.upsert({
           id: "quizData",
