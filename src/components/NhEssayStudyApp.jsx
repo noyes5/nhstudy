@@ -94,7 +94,7 @@ export default function NhEssayStudyApp() {
     }
   }
 
-  const current = filteredQuizData[step];
+  const current = filteredQuizData[step] || null;
   const normalize = (str) => str.replace(/,|\s+/g, "").trim();
 
   const handleNext = (check = true) => {
