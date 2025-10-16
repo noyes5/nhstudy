@@ -48,6 +48,8 @@ export default function NhEssayStudyApp() {
   const [selectedCategory, setSelectedCategory] = useState("전체");
   // 삭제 확인 상태
   const [deletingId, setDeletingId] = useState(null);
+  // 완료 메시지 상태
+  const [showCompletionMessage, setShowCompletionMessage] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("nickname");
@@ -102,13 +104,16 @@ export default function NhEssayStudyApp() {
   const normalize = (str) => str.replace(/,|\s+/g, "").trim();
 
   const handleNext = (check = true) => {
+    // 1. 마지막 문제인지 미리 확인
+    const isLastQuestion = step === filteredQuizData.length - 1;
+
     if (check && current.id) {
       const userAnswer = normalize(answers[current.id] || "");
       const correctAnswer = normalize(current.answer);
       const correct = userAnswer === correctAnswer;
       setIsCorrect(correct);
-      setShowPopup(true);
-      setTimeout(() => setShowPopup(false), 1500);
+      setShowPopup(true); // 정답/오답 팝업 표시
+      setTimeout(() => setShowPopup(false), 1500); // 1.5초 후 팝업 숨김
 
       if (!correct && !bookmarked.includes(current.id)) {
         const updated = [...bookmarked, current.id];
@@ -121,11 +126,18 @@ export default function NhEssayStudyApp() {
       }
     }
 
-    if (step < filteredQuizData.length - 1) {
+    // 2. 마지막 문제가 아니면 다음 문제로 이동
+    if (!isLastQuestion) {
       setStep(step + 1);
       setRevealAnswer(false);
     } else {
-      alert("🎉 모든 문제를 완료했습니다!");
+      // 3. 마지막 문제인 경우
+      // '채점'을 눌렀으면(check=true) 1.5초(팝업 시간) 뒤에, '건너뛰기'면 즉시 완료 메시지 표시
+      const delay = check ? 1500 : 0;
+      setTimeout(() => {
+        setShowCompletionMessage(true);
+        setTimeout(() => setShowCompletionMessage(false), 3000); // 3초간 완료 메시지 표시
+      }, delay);
     }
   };
 
@@ -180,7 +192,7 @@ export default function NhEssayStudyApp() {
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            placeholder="예: 상현"
+            placeholder="예: 강호동"
             className="border p-2 rounded w-full mb-3 text-center"
           />
           <button
@@ -207,7 +219,16 @@ export default function NhEssayStudyApp() {
         </div>
       )}
 
-      {/* ✅ 3번 요청: 삭제 확인 모달 */}
+      {/* 완료 메시지 팝업 */}
+      {showCompletionMessage && (
+        <div
+          className="fixed top-10 px-6 py-3 rounded-lg shadow-lg text-white font-semibold z-50 bg-blue-500 animate-fade-in-out-3s"
+        >
+          🎉 모든 문제를 완료했습니다!
+        </div>
+      )}
+
+      {/* 삭제 확인 모달 */}
       {deletingId && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-80 text-center animate-fade-in">
@@ -303,9 +324,11 @@ export default function NhEssayStudyApp() {
               ))}
             </ul>
 
-            {editingId && (
-              <div className="space-y-2"> {/* space-y-2 추가 */}
-                {/* ✅ 2번 요청: 카테고리 Input을 select로 변경 */}
+            {/* ✅ 2번 요청: 수정 폼과 추가 폼을 분리 */}
+            {editingId ? (
+              // --- 수정 폼 ---
+              <div className="mt-6 space-y-2 border p-4 rounded-lg bg-gray-50">
+                <h2 className="text-lg font-semibold text-green-700 mb-2">문제 수정</h2>
                 <select
                   value={editData.category}
                   onChange={(e) => setEditData({ ...editData, category: e.target.value })}
@@ -320,27 +343,30 @@ export default function NhEssayStudyApp() {
                 <Button onClick={handleSaveEdit} className="bg-green-600 hover:bg-green-700 w-full">
                   수정 저장
                 </Button>
+                <Button onClick={() => setEditingId(null)} className="bg-gray-400 hover:bg-gray-500 w-full">
+                  수정 취소
+                </Button>
+              </div>
+            ) : (
+              // --- 추가 폼 ---
+              <div className="mt-6 space-y-2">
+                <h2 className="text-lg font-semibold text-green-700">문제 추가</h2>
+                <select
+                  value={newQuestion.category}
+                  onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
+                  className="border border-gray-300 rounded p-2 w-full focus:ring focus:ring-green-200"
+                >
+                  {CATEGORIES.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
+                </select>
+                <Input placeholder="문제 입력" value={newQuestion.question}
+                  onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })} />
+                <Input placeholder="정답 입력" value={newQuestion.answer}
+                  onChange={(e) => setNewQuestion({ ...newQuestion, answer: e.target.value })} />
+                <Button onClick={handleAddQuestion} className="bg-blue-600 hover:bg-blue-700 w-full">
+                  S                문제 추가
+                </Button>
               </div>
             )}
-
-            <div className="mt-6 space-y-2">
-              <h2 className="text-lg font-semibold text-green-700">문제 추가</h2>
-              {/* ✅ 2번 요청: 카테고리 Input을 select로 변경 */}
-              <select
-                value={newQuestion.category}
-                onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
-                className="border border-gray-300 rounded p-2 w-full focus:ring focus:ring-green-200"
-              >
-                {CATEGORIES.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
-              </select>
-              <Input placeholder="문제 입력" value={newQuestion.question}
-                onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })} />
-              <Input placeholder="정답 입력" value={newQuestion.answer}
-                onChange={(e) => setNewQuestion({ ...newQuestion, answer: e.target.value })} />
-              <Button onClick={handleAddQuestion} className="bg-blue-600 hover:bg-blue-700 w-full">
-                문제 추가
-              </Button>
-            </div>
           </>
         ) : (
           <>
@@ -433,6 +459,15 @@ export default function NhEssayStudyApp() {
           100% { opacity: 0; transform: translateY(-10px); }
         }
         .animate-fade-in-out { animation: fade-in-out 1.5s ease-in-out; }
+
+        {/* ✅ 1번 요청: 3초간 지속되는 완료 팝업 애니메이션 추가 */}
+        @keyframes fade-in-out-3s {
+          0% { opacity: 0; transform: translateY(-10px); }
+          15% { opacity: 1; transform: translateY(0); }
+          85% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-10px); }
+        }
+        .animate-fade-in-out-3s { animation: fade-in-out-3s 3s ease-in-out; }
       `}</style>
     </div>
   );
