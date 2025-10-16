@@ -26,8 +26,8 @@ app.http('getQuizData', {
       if (nickname) {
         try {
           const { resource: userDoc } = await container
-            .item(`bookmark_${nickname}`, "bookmark")
-            .read();
+  .item(`bookmark_${nickname}`, `bookmark_${nickname}`)
+  .read();
           bookmarked = userDoc?.bookmarked || [];
         } catch {
           context.log(`No bookmark found for ${nickname}`);

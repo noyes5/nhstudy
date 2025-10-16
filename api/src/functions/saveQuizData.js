@@ -22,12 +22,12 @@ app.http('saveQuizData', {
 
       // 닉네임별 북마크 저장
       await container.items.upsert({
-        id: `bookmark_${nickname}`,
-        partitionKey: "bookmark",
-        nickname,
-        bookmarked,
-        updatedAt: new Date().toISOString(),
-      });
+  id: `bookmark_${nickname}`,
+  partitionKey: `bookmark_${nickname}`,
+  nickname,
+  bookmarked,
+});
+
 
       // quizData는 공용으로 저장
       if (quizData) {
