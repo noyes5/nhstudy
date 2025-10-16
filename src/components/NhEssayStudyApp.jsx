@@ -158,36 +158,60 @@ export default function NhEssayStudyApp() {
     question: "",
     answer: "",
   });
+  const [nickname, setNickname] = useState(localStorage.getItem("nickname") || "");
 
-  async function saveQuizData(
-    updatedQuizData = quizData,
-    updatedBookmarked = bookmarked
-  ) {
-    try {
-      await fetch("/api/saveQuizData", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          quizData: updatedQuizData,
-          bookmarked: updatedBookmarked,
-        }),
-      });
-    } catch (e) {
-      console.error("저장 실패:", e);
-    }
+return (
+  <div className="fixed top-2 right-2 flex gap-2 items-center">
+    <input
+      value={nickname}
+      onChange={(e) => {
+        setNickname(e.target.value);
+        localStorage.setItem("nickname", e.target.value);
+      }}
+      placeholder="닉네임 입력"
+      className="border p-1 rounded text-sm"
+    />
+    <button
+      onClick={loadQuizData}
+      className="bg-green-500 text-white px-2 py-1 rounded text-sm"
+    >
+      불러오기
+    </button>
+  </div>
+);
+
+
+  async function saveQuizData(updatedQuizData = quizData, updatedBookmarked = bookmarked) {
+  if (!nickname) return alert("닉네임을 입력하세요!");
+
+  try {
+    await fetch("/api/saveQuizData", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        quizData: updatedQuizData,
+        bookmarked: updatedBookmarked,
+        nickname,
+      }),
+    });
+  } catch (e) {
+    console.error("저장 실패:", e);
   }
+}
 
   // ✅ DB 불러오기
   async function loadQuizData() {
-    try {
-      const res = await fetch("/api/getQuizData");
-      const data = await res.json();
-      if (data.quizData?.length) setQuizData(data.quizData);
-      if (data.bookmarked) setBookmarked(data.bookmarked);
-    } catch (e) {
-      console.error("불러오기 실패:", e);
-    }
+  if (!nickname) return alert("닉네임을 입력하세요!");
+  try {
+    const res = await fetch(`/api/getQuizData?nickname=${nickname}`);
+    const data = await res.json();
+    if (data.quizData?.length) setQuizData(data.quizData);
+    if (data.bookmarked) setBookmarked(data.bookmarked);
+  } catch (e) {
+    console.error("불러오기 실패:", e);
   }
+}
+
 
   useEffect(() => {
     loadQuizData();

@@ -1,7 +1,6 @@
 const { app } = require('@azure/functions');
 const { CosmosClient } = require("@azure/cosmos");
 
-// Cosmos DB 클라이언트는 한 번만 초기화합니다.
 const endpoint = process.env.COSMOS_DB_ENDPOINT;
 const key = process.env.COSMOS_DB_KEY;
 const client = new CosmosClient({ endpoint, key });
@@ -9,39 +8,40 @@ const database = client.database("quizdb");
 const container = database.container("reviewQuestions");
 
 app.http('saveQuizData', {
-    methods: ['POST'],
-    authLevel: 'anonymous',
-    handler: async (request, context) => {
-        context.log(`Http function 'saveQuizData' processed request.`);
+  methods: ['POST'],
+  authLevel: 'anonymous',
+  handler: async (request, context) => {
+    try {
+      const { quizData, bookmarked, nickname } = await request.json();
 
-        try {
-            // POST 요청의 본문(body)을 읽어옵니다.
-            const { quizData, bookmarked } = await request.json();
+      if (!nickname) {
+        return { status: 400, body: "닉네임이 필요합니다." };
+      }
 
-            if (!quizData) {
-                return { status: 400, body: "quizData is required." };
-            }
+      // 북마크 데이터만 닉네임별로 따로 저장
+      await container.items.upsert({
+        id: `bookmark_${nickname}`,
+        partitionKey: "bookmark",
+        nickname,
+        bookmarked,
+      });
 
-            await container.items.upsert({
-                id: "quizData",
-                partitionKey: "quizData", // 여기에 실제 파티션 키 필드 이름을 넣으세요. 없다면 id와 동일하게.
-                quizData,
-                bookmarked,
-            });
+      // quizData는 공용 문서로 유지
+      if (quizData) {
+        await container.items.upsert({
+          id: "quizData",
+          partitionKey: "quizData",
+          quizData,
+        });
+      }
 
-            context.log("Successfully saved item to Cosmos DB.");
-
-            return {
-                status: 200,
-                jsonBody: { message: "저장 성공" }
-            };
-
-        } catch (err) {
-            context.log.error(`Error saving to Cosmos DB: ${err.message}`);
-            return {
-                status: 500,
-                body: `Database error: ${err.message}`
-            };
-        }
+      return {
+        status: 200,
+        jsonBody: { message: "저장 성공" },
+      };
+    } catch (err) {
+      context.log.error(`Error saving to Cosmos DB: ${err.message}`);
+      return { status: 500, body: `Database error: ${err.message}` };
     }
+  },
 });
