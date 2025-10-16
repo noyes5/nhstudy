@@ -12,12 +12,12 @@ app.http('saveQuizData', {
   methods: ['POST'],
   authLevel: 'anonymous',
   handler: async (request, context) => {
-    context.log(`Http function 'saveQuizData' processed request.`);
+    context.log("Http function 'saveQuizData' called.");
     try {
       const { quizData, bookmarked, nickname } = await request.json();
 
       if (!nickname) {
-        return { status: 400, body: "닉네임이 필요합니다." };
+        return { status: 400, body: "nickname is required" };
       }
 
       // 닉네임별 북마크 저장
@@ -26,6 +26,7 @@ app.http('saveQuizData', {
         partitionKey: "bookmark",
         nickname,
         bookmarked,
+        updatedAt: new Date().toISOString(),
       });
 
       // quizData는 공용으로 저장
@@ -39,7 +40,7 @@ app.http('saveQuizData', {
 
       return {
         status: 200,
-        jsonBody: { message: "저장 성공" },
+        jsonBody: { message: "Saved successfully" },
       };
     } catch (err) {
       context.log.error(`Error saving to Cosmos DB: ${err.message}`);

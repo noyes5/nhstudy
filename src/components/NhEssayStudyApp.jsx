@@ -2,24 +2,7 @@ import { useEffect, useState } from "react";
 import { Star } from "lucide-react";
 
 function Card({ children, className = "" }) {
-  return (
-    <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>
-      {children}
-    </div>
-  );
-}
-function CardContent({ children, className = "" }) {
-  return <div className={className}>{children}</div>;
-}
-function Button({ children, onClick, className = "" }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`px-4 py-2 rounded font-semibold text-white transition ${className}`}
-    >
-      {children}
-    </button>
-  );
+  return <div className={`bg-white rounded-xl shadow-lg p-6 ${className}`}>{children}</div>;
 }
 function Input({ value, onChange, placeholder, className = "" }) {
   return (
@@ -29,6 +12,16 @@ function Input({ value, onChange, placeholder, className = "" }) {
       placeholder={placeholder}
       className={`border border-gray-300 rounded p-2 w-full focus:ring focus:ring-green-200 ${className}`}
     />
+  );
+}
+function Button({ children, onClick, className = "" }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 rounded font-semibold text-white transition ${className}`}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -46,21 +39,28 @@ export default function NhEssayStudyApp() {
   const [newQuestion, setNewQuestion] = useState({ category: "", question: "", answer: "" });
 
   // ✅ 닉네임 관리
-  const [nickname, setNickname] = useState(localStorage.getItem("nickname") || "");
-  const [showNicknamePopup, setShowNicknamePopup] = useState(!localStorage.getItem("nickname"));
+  const [nickname, setNickname] = useState("");
+  const [showNicknamePopup, setShowNicknamePopup] = useState(true);
 
-  // ✅ 닉네임 입력 완료
+  useEffect(() => {
+    const stored = localStorage.getItem("nickname");
+    if (stored) {
+      setNickname(stored);
+      setShowNicknamePopup(false);
+      loadQuizData(stored);
+    }
+  }, []);
+
   const handleConfirmNickname = () => {
     if (!nickname.trim()) return alert("닉네임을 입력하세요!");
     localStorage.setItem("nickname", nickname);
     setShowNicknamePopup(false);
-    loadQuizData();
+    loadQuizData(nickname);
   };
 
-  // ✅ 데이터 불러오기
-  async function loadQuizData() {
+  async function loadQuizData(name = nickname) {
     try {
-      const res = await fetch(`/api/getQuizData?nickname=${nickname}`);
+      const res = await fetch(`/api/getQuizData?nickname=${name}`);
       const data = await res.json();
       if (data.quizData?.length) setQuizData(data.quizData);
       if (data.bookmarked) setBookmarked(data.bookmarked);
@@ -69,7 +69,6 @@ export default function NhEssayStudyApp() {
     }
   }
 
-  // ✅ 데이터 저장
   async function saveQuizData(updatedQuizData = quizData, updatedBookmarked = bookmarked) {
     try {
       await fetch("/api/saveQuizData", {
@@ -85,10 +84,6 @@ export default function NhEssayStudyApp() {
       console.error("저장 실패:", e);
     }
   }
-
-  useEffect(() => {
-    if (nickname) loadQuizData();
-  }, []);
 
   const current = quizData[step] || {};
   const normalize = (str) => str.replace(/,|\s+/g, "").trim();
@@ -136,7 +131,6 @@ export default function NhEssayStudyApp() {
       );
       setQuizData(updated);
       setEditingId(null);
-      setEditData({ category: "", question: "", answer: "" });
       saveQuizData(updated, bookmarked);
     }
   };
@@ -155,18 +149,11 @@ export default function NhEssayStudyApp() {
     saveQuizData(updated, bookmarked);
   };
 
-  const handleGoToBookmarked = (id) => {
-    const index = quizData.findIndex((q) => q.id === id);
-    if (index !== -1) setStep(index);
-  };
-
   if (showNicknamePopup) {
     return (
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
         <div className="bg-white rounded-xl shadow-2xl p-6 w-80 text-center animate-fade-in">
-          <h2 className="text-lg font-bold text-green-800 mb-4">
-            🌱 닉네임을 입력해주세요
-          </h2>
+          <h2 className="text-lg font-bold text-green-800 mb-4">🌱 닉네임을 입력해주세요</h2>
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
@@ -199,6 +186,13 @@ export default function NhEssayStudyApp() {
       )}
 
       <Card className="max-w-2xl w-full shadow-lg p-6 relative">
+        <button
+          onClick={() => setShowNicknamePopup(true)}
+          className="absolute top-3 left-3 text-sm text-gray-600 underline"
+        >
+          닉네임 변경
+        </button>
+
         <button
           onClick={() =>
             setBookmarked((prev) =>
@@ -242,21 +236,12 @@ export default function NhEssayStudyApp() {
 
             {editingId && (
               <>
-                <Input
-                  placeholder="카테고리"
-                  value={editData.category}
-                  onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                />
-                <Input
-                  placeholder="문제 수정"
-                  value={editData.question}
-                  onChange={(e) => setEditData({ ...editData, question: e.target.value })}
-                />
-                <Input
-                  placeholder="정답 수정"
-                  value={editData.answer}
-                  onChange={(e) => setEditData({ ...editData, answer: e.target.value })}
-                />
+                <Input placeholder="카테고리" value={editData.category}
+                  onChange={(e) => setEditData({ ...editData, category: e.target.value })}/>
+                <Input placeholder="문제 수정" value={editData.question}
+                  onChange={(e) => setEditData({ ...editData, question: e.target.value })}/>
+                <Input placeholder="정답 수정" value={editData.answer}
+                  onChange={(e) => setEditData({ ...editData, answer: e.target.value })}/>
                 <Button onClick={handleSaveEdit} className="bg-green-600 hover:bg-green-700 w-full">
                   수정 저장
                 </Button>
@@ -265,28 +250,19 @@ export default function NhEssayStudyApp() {
 
             <div className="mt-6 space-y-2">
               <h2 className="text-lg font-semibold text-green-700">문제 추가</h2>
-              <Input
-                placeholder="카테고리"
-                value={newQuestion.category}
-                onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}
-              />
-              <Input
-                placeholder="문제 입력"
-                value={newQuestion.question}
-                onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
-              />
-              <Input
-                placeholder="정답 입력"
-                value={newQuestion.answer}
-                onChange={(e) => setNewQuestion({ ...newQuestion, answer: e.target.value })}
-              />
+              <Input placeholder="카테고리" value={newQuestion.category}
+                onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}/>
+              <Input placeholder="문제 입력" value={newQuestion.question}
+                onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}/>
+              <Input placeholder="정답 입력" value={newQuestion.answer}
+                onChange={(e) => setNewQuestion({ ...newQuestion, answer: e.target.value })}/>
               <Button onClick={handleAddQuestion} className="bg-blue-600 hover:bg-blue-700 w-full">
                 문제 추가
               </Button>
             </div>
           </>
         ) : (
-          <CardContent>
+          <>
             <p className="text-gray-800 font-medium mb-4 leading-relaxed">{current.question}</p>
             <Input
               placeholder="답변 입력..."
@@ -323,11 +299,8 @@ export default function NhEssayStudyApp() {
                   {bookmarked.map((id) => {
                     const q = quizData.find((q) => q.id === id);
                     return (
-                      <li
-                        key={id}
-                        className="cursor-pointer hover:text-green-700"
-                        onClick={() => handleGoToBookmarked(id)}
-                      >
+                      <li key={id} className="cursor-pointer hover:text-green-700"
+                        onClick={() => setStep(quizData.findIndex((q) => q.id === id))}>
                         {q?.question}
                       </li>
                     );
@@ -335,7 +308,7 @@ export default function NhEssayStudyApp() {
                 </ul>
               </div>
             )}
-          </CardContent>
+          </>
         )}
 
         <Button
@@ -345,6 +318,21 @@ export default function NhEssayStudyApp() {
           {editMode ? "문제 풀기 모드로" : "문제 추가/수정 모드로"}
         </Button>
       </Card>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in { animation: fade-in 0.3s ease-in-out; }
+        @keyframes fade-in-out {
+          0% { opacity: 0; transform: translateY(-10px); }
+          20% { opacity: 1; transform: translateY(0); }
+          80% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-10px); }
+        }
+        .animate-fade-in-out { animation: fade-in-out 1.5s ease-in-out; }
+      `}</style>
     </div>
   );
 }
