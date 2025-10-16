@@ -495,13 +495,13 @@ export default function NhEssayStudyApp() {
                     onClick={() => handleNext(true)}
                     className="flex-1 bg-green-600 hover:bg-green-700"
                   >
-                    다음 문제 (채점)
+                    정답 제출
                   </Button>
                   <Button
                     onClick={() => handleNext(false)}
                     className="flex-1 bg-blue-500 hover:bg-blue-600"
                   >
-                    건너뛰기
+                    다음 문제(건너뛰기)
                   </Button>
                 </div>
 
