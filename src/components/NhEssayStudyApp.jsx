@@ -127,28 +127,38 @@ export default function NhEssayStudyApp() {
   const current = filteredQuizData[step] || {};
   const normalize = (str) => str.replace(/,|\s+/g, "").trim();
 
-  const handleNext = (check = true) => {
-    // 1. 마지막 문제인지 미리 확인
+  const handleNext = (check = true, directInput) => {
+    console.log("==== handleNext 호출 ====");
+console.log("directInput:", directInput);
+console.log("step:", step);
+console.log("current:", current);
+console.log("filteredQuizData:", filteredQuizData.map(q => q.question));
+console.log("answers:", answers);
     const isLastQuestion = step === filteredQuizData.length - 1;
+    const currentId = current.id;
 
-    if (check && current.id) {
-      const userAnswer = normalize(answers[current.id] || "");
-      const correctAnswer = normalize(current.answer);
+    // ✅ 최신 입력값 우선 사용
+    const userInput = directInput ?? answers[currentId] ?? "";
+    const userAnswer = normalize(userInput);
+    const correctAnswer = normalize(current.answer);
+
+    if (check && currentId) {
       const correct = userAnswer === correctAnswer;
       setIsCorrect(correct);
-      setShowPopup(true); // 정답/오답 팝업 표시
-      setTimeout(() => setShowPopup(false), 700); // 0.7초 후 팝업 숨김
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 700);
 
-      if (!correct && !bookmarked.includes(current.id)) {
-        const updated = [...bookmarked, current.id];
+      if (!correct && !bookmarked.includes(currentId)) {
+        const updated = [...bookmarked, currentId];
         setBookmarked(updated);
         saveQuizData(quizData, updated);
-      } else if (correct && bookmarked.includes(current.id)) {
-        const updated = bookmarked.filter((id) => id !== current.id);
+      } else if (correct && bookmarked.includes(currentId)) {
+        const updated = bookmarked.filter((id) => id !== currentId);
         setBookmarked(updated);
         saveQuizData(quizData, updated);
       }
     }
+
 
     // 2. 마지막 문제가 아니면 다음 문제로 이동
     if (!isLastQuestion) {
@@ -213,6 +223,26 @@ export default function NhEssayStudyApp() {
     }
   };
 
+  useEffect(() => {
+    if (editMode || showNicknamePopup) return;
+
+    const handleKeyUp = (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        handleNext(true,e.target.value);
+      } else if (e.key === "[") {
+        e.preventDefault();
+        handlePrev();
+      } else if (e.key === "]") {
+        e.preventDefault();
+        handleNext(false);
+      }
+    };
+
+    window.addEventListener("keyup", handleKeyUp);
+    return () => window.removeEventListener("keyup", handleKeyUp);
+  }, [editMode, showNicknamePopup, step, filteredQuizData.length]);
+
   if (showNicknamePopup) {
     return (
       <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -237,13 +267,14 @@ export default function NhEssayStudyApp() {
     );
   }
 
+
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-emerald-50 to-green-100 p-6 relative">
       {showPopup && (
         <div
-          className={`fixed top-10 px-6 py-3 rounded-lg shadow-lg text-white font-semibold z-50 ${
-            isCorrect ? "bg-green-600" : "bg-red-500"
-          } animate-fade-in-out`}
+          className={`fixed top-10 px-6 py-3 rounded-lg shadow-lg text-white font-semibold z-50 ${isCorrect ? "bg-green-600" : "bg-red-500"
+            } animate-fade-in-out`}
         >
           {isCorrect
             ? "✅ 정답입니다!"
@@ -300,11 +331,10 @@ export default function NhEssayStudyApp() {
                 : [...prev, current.id]
             )
           }
-          className={`absolute top-4 right-4 ${
-            bookmarked.includes(current.id)
-              ? "text-yellow-400"
-              : "text-gray-300"
-          }`}
+          className={`absolute top-4 right-4 ${bookmarked.includes(current.id)
+            ? "text-yellow-400"
+            : "text-gray-300"
+            }`}
         >
           <Star
             fill={bookmarked.includes(current.id) ? "currentColor" : "none"}
@@ -325,11 +355,10 @@ export default function NhEssayStudyApp() {
                 setStep(0); // 카테고리 변경 시 첫 문제로
                 setRevealAnswer(false);
               }}
-              className={`px-3 py-1 text-sm ${
-                selectedCategory === cat
-                  ? "bg-green-700"
-                  : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-              }`}
+              className={`px-3 py-1 text-sm ${selectedCategory === cat
+                ? "bg-green-700"
+                : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+                }`}
             >
               {cat}
             </Button>
@@ -466,9 +495,8 @@ export default function NhEssayStudyApp() {
                 <Input
                   placeholder="답변 입력..."
                   value={answers[current.id] || ""}
-                  onChange={(e) =>
-                    setAnswers({ ...answers, [current.id]: e.target.value })
-                  }
+                  onChange={(e) => setAnswers({ ...answers, [current.id]: e.target.value })}
+                  onEnter={(val) => handleNext(true, val)}  // ✅ 최신 입력값 전달
                   className="mb-4"
                 />
 
