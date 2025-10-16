@@ -37,6 +37,7 @@ export default function NhEssayStudyApp() {
   const [editingId, setEditingId] = useState(null);
   const [editData, setEditData] = useState({ category: "", question: "", answer: "" });
   const [newQuestion, setNewQuestion] = useState({ category: "", question: "", answer: "" });
+  const [mode, setMode] = useState("all"); // all, agri, it
 
   // ✅ 닉네임 관리
   const [nickname, setNickname] = useState("");
@@ -50,6 +51,14 @@ export default function NhEssayStudyApp() {
       loadQuizData(stored);
     }
   }, []);
+
+  const filteredQuizData = quizData.filter((q) => {
+  if (mode === "all") return true;
+  if (mode === "agri") return q.category === "농업";
+  if (mode === "it") return q.category === "IT";
+  return true;
+});
+
 
   const handleConfirmNickname = () => {
     if (!nickname.trim()) return alert("닉네임을 입력하세요!");
@@ -85,7 +94,7 @@ export default function NhEssayStudyApp() {
     }
   }
 
-  const current = quizData[step] || {};
+  const current = filteredQuizData[step];
   const normalize = (str) => str.replace(/,|\s+/g, "").trim();
 
   const handleNext = (check = true) => {
@@ -157,7 +166,7 @@ export default function NhEssayStudyApp() {
           <input
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
-            placeholder="예: 상현"
+            placeholder="예: 호동"
             className="border p-2 rounded w-full mb-3 text-center"
           />
           <button
@@ -211,6 +220,18 @@ export default function NhEssayStudyApp() {
         <h1 className="text-2xl font-bold text-green-800 mb-4 text-center">
           🌾 2025 농협 논술 핵심 암기 스터디
         </h1>
+        <div className="flex justify-center gap-2 mb-4">
+  <Button onClick={() => { setMode("agri"); setStep(0); }} className="bg-green-600 hover:bg-green-700">
+    🌾 농업편
+  </Button>
+  <Button onClick={() => { setMode("it"); setStep(0); }} className="bg-blue-600 hover:bg-blue-700">
+    💻 IT편
+  </Button>
+  <Button onClick={() => { setMode("all"); setStep(0); }} className="bg-gray-600 hover:bg-gray-700">
+    📚 전체
+  </Button>
+</div>
+
 
         {editMode ? (
           <>
@@ -234,32 +255,59 @@ export default function NhEssayStudyApp() {
               ))}
             </ul>
 
-            {editingId && (
-              <>
-                <Input placeholder="카테고리" value={editData.category}
-                  onChange={(e) => setEditData({ ...editData, category: e.target.value })}/>
-                <Input placeholder="문제 수정" value={editData.question}
-                  onChange={(e) => setEditData({ ...editData, question: e.target.value })}/>
-                <Input placeholder="정답 수정" value={editData.answer}
-                  onChange={(e) => setEditData({ ...editData, answer: e.target.value })}/>
-                <Button onClick={handleSaveEdit} className="bg-green-600 hover:bg-green-700 w-full">
-                  수정 저장
-                </Button>
-              </>
-            )}
-
             <div className="mt-6 space-y-2">
-              <h2 className="text-lg font-semibold text-green-700">문제 추가</h2>
-              <Input placeholder="카테고리" value={newQuestion.category}
-                onChange={(e) => setNewQuestion({ ...newQuestion, category: e.target.value })}/>
-              <Input placeholder="문제 입력" value={newQuestion.question}
-                onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}/>
-              <Input placeholder="정답 입력" value={newQuestion.answer}
-                onChange={(e) => setNewQuestion({ ...newQuestion, answer: e.target.value })}/>
-              <Button onClick={handleAddQuestion} className="bg-blue-600 hover:bg-blue-700 w-full">
-                문제 추가
-              </Button>
-            </div>
+  <h2 className="text-lg font-semibold text-green-700">문제 추가</h2>
+
+  <div className="flex gap-4 mb-2">
+    <label className="flex items-center gap-1">
+      <input
+        type="radio"
+        name="addCategory"
+        value="농업"
+        checked={newQuestion.category === "농업"}
+        onChange={(e) =>
+          setNewQuestion({ ...newQuestion, category: e.target.value })
+        }
+      />
+      🌾 농업
+    </label>
+
+    <label className="flex items-center gap-1">
+      <input
+        type="radio"
+        name="addCategory"
+        value="IT"
+        checked={newQuestion.category === "IT"}
+        onChange={(e) =>
+          setNewQuestion({ ...newQuestion, category: e.target.value })
+        }
+      />
+      💻 IT
+    </label>
+  </div>
+
+  <Input
+    placeholder="문제 입력"
+    value={newQuestion.question}
+    onChange={(e) =>
+      setNewQuestion({ ...newQuestion, question: e.target.value })
+    }
+  />
+  <Input
+    placeholder="정답 입력"
+    value={newQuestion.answer}
+    onChange={(e) =>
+      setNewQuestion({ ...newQuestion, answer: e.target.value })
+    }
+  />
+  <Button
+    onClick={handleAddQuestion}
+    className="bg-blue-600 hover:bg-blue-700 w-full"
+  >
+    문제 추가
+  </Button>
+</div>
+
           </>
         ) : (
           <>
