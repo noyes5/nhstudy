@@ -113,7 +113,7 @@ export default function NhEssayStudyApp() {
       const correct = userAnswer === correctAnswer;
       setIsCorrect(correct);
       setShowPopup(true); // 정답/오답 팝업 표시
-      setTimeout(() => setShowPopup(false), 1500); // 1.5초 후 팝업 숨김
+      setTimeout(() => setShowPopup(false), 700); // 0.7초 후 팝업 숨김
 
       if (!correct && !bookmarked.includes(current.id)) {
         const updated = [...bookmarked, current.id];
@@ -233,7 +233,7 @@ export default function NhEssayStudyApp() {
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-2xl p-6 w-80 text-center animate-fade-in">
             <h2 className="text-lg font-bold text-gray-800 mb-4">정말 삭제하시겠습니까?</h2>
-            <p className="text-gray-600 mb-6">이 작업은 되돌릴 수 없습니다.</p>
+            <p className="text-gray-600 mb-6">ㄹㅇ로요?</p>
             <div className="flex gap-4">
               <button
                 onClick={() => setDeletingId(null)}
@@ -245,7 +245,7 @@ export default function NhEssayStudyApp() {
                 onClick={confirmDelete}
                 className="flex-1 w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded"
               >
-                예, 삭제합니다
+                네
               </button>
             </div>
           </div>
@@ -278,7 +278,7 @@ export default function NhEssayStudyApp() {
           🌾 2025 농협 논술 암기 페이지
         </h1>
 
-        {/* ✅ 1번 요청: 카테고리 필터 버튼 */}
+        {/* 카테고리 필터 버튼 */}
         <div className="flex justify-center gap-2 mb-4">
           {["전체", ...CATEGORIES].map((cat) => (
             <Button
@@ -304,7 +304,7 @@ export default function NhEssayStudyApp() {
               {selectedCategory === "전체" ? "전체" : selectedCategory} 문제 목록
             </h2>
             <ul className="border rounded p-3 max-h-48 overflow-y-auto bg-white/70 mb-4">
-              {/* ✅ 1번 요청: filteredQuizData 사용 */}
+              {/* filteredQuizData 사용 */}
               {filteredQuizData.map((q) => (
                 <li key={q.id} className="flex justify-between items-center py-1">
                   <span
@@ -313,7 +313,7 @@ export default function NhEssayStudyApp() {
                   >
                     {q.question}
                   </span>
-                  {/* ✅ 3번 요청: 삭제 버튼으로 변경 및 setDeletingId 호출 */}
+                  {/* 삭제 버튼으로 변경 및 setDeletingId 호출 */}
                   <button
                     onClick={() => setDeletingId(q.id)}
                     className="px-2 py-1 rounded text-xs text-white bg-red-500 hover:bg-red-600"
@@ -324,7 +324,7 @@ export default function NhEssayStudyApp() {
               ))}
             </ul>
 
-            {/* ✅ 2번 요청: 수정 폼과 추가 폼을 분리 */}
+            {/* 수정 폼과 추가 폼을 분리 */}
             {editingId ? (
               // --- 수정 폼 ---
               <div className="mt-6 space-y-2 border p-4 rounded-lg bg-gray-50">
@@ -363,7 +363,7 @@ export default function NhEssayStudyApp() {
                 <Input placeholder="정답 입력" value={newQuestion.answer}
                   onChange={(e) => setNewQuestion({ ...newQuestion, answer: e.target.value })} />
                 <Button onClick={handleAddQuestion} className="bg-blue-600 hover:bg-blue-700 w-full">
-                  S                문제 추가
+                  문제 추가
                 </Button>
               </div>
             )}
@@ -460,7 +460,7 @@ export default function NhEssayStudyApp() {
         }
         .animate-fade-in-out { animation: fade-in-out 1.5s ease-in-out; }
 
-        {/* ✅ 1번 요청: 3초간 지속되는 완료 팝업 애니메이션 추가 */}
+        {/* 3초간 지속되는 완료 팝업 애니메이션 추가 */}
         @keyframes fade-in-out-3s {
           0% { opacity: 0; transform: translateY(-10px); }
           15% { opacity: 1; transform: translateY(0); }
