@@ -128,12 +128,7 @@ export default function NhEssayStudyApp() {
   const normalize = (str) => str.replace(/,|\s+/g, "").trim();
 
   const handleNext = (check = true, directInput) => {
-    console.log("==== handleNext 호출 ====");
-console.log("directInput:", directInput);
-console.log("step:", step);
-console.log("current:", current);
-console.log("filteredQuizData:", filteredQuizData.map(q => q.question));
-console.log("answers:", answers);
+    // 1. 마지막 문제인지 미리 확인
     const isLastQuestion = step === filteredQuizData.length - 1;
     const currentId = current.id;
 
@@ -223,13 +218,14 @@ console.log("answers:", answers);
     }
   };
 
+  // 엔터, [, ] 키를 통해서 이전 다음문제 가기기능
   useEffect(() => {
     if (editMode || showNicknamePopup) return;
 
     const handleKeyUp = (e) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        handleNext(true,e.target.value);
+        handleNext(true, e.target.value);
       } else if (e.key === "[") {
         e.preventDefault();
         handlePrev();
