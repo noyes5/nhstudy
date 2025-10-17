@@ -343,22 +343,38 @@ export default function NhEssayStudyApp() {
 
         {/* 카테고리 필터 버튼 */}
         <div className="flex justify-center gap-2 mb-4">
-          {["전체", ...CATEGORIES].map((cat) => (
-            <Button
-              key={cat}
-              onClick={() => {
-                setSelectedCategory(cat);
-                setStep(0); // 카테고리 변경 시 첫 문제로
-                setRevealAnswer(false);
-              }}
-              className={`px-3 py-1 text-sm ${selectedCategory === cat
-                ? "bg-green-700"
-                : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-                }`}
-            >
-              {cat}
-            </Button>
-          ))}
+          {["전체", ...CATEGORIES].map((cat) => {
+  const base =
+    "px-3 py-1 text-sm font-semibold text-white transition rounded";
+  let activeColor = "";
+  let inactiveColor = "bg-gray-300 text-gray-700 hover:bg-gray-400";
+
+  if (cat === "전체") activeColor = "bg-gray-700 hover:bg-gray-800";
+  if (cat === "농업") activeColor = "bg-green-600 hover:bg-green-700";
+  if (cat === "IT") activeColor = "bg-blue-600 hover:bg-blue-700";
+
+  const icons = {
+    전체: "📚",
+    농업: "🌾",
+    IT: "💻",
+  };
+
+  return (
+    <Button
+      key={cat}
+      onClick={() => {
+        setSelectedCategory(cat);
+        setStep(0);
+        setRevealAnswer(false);
+      }}
+      className={`${base} ${
+        selectedCategory === cat ? activeColor : inactiveColor
+      }`}
+    >
+      {icons[cat]} {cat}
+    </Button>
+  );
+})}
         </div>
 
         {editMode ? (
