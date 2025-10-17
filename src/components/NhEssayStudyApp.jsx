@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Star } from "lucide-react";
+import { Star, Trash } from "lucide-react";
 
 function Card({ children, className = "" }) {
   return (
@@ -382,11 +382,12 @@ export default function NhEssayStudyApp() {
                   </span>
                   {/* 삭제 버튼으로 변경 및 setDeletingId 호출 */}
                   <button
-                    onClick={() => setDeletingId(q.id)}
-                    className="px-2 py-1 rounded text-xs text-white bg-red-500 hover:bg-red-600"
-                  >
-                    삭제
-                  </button>
+  onClick={() => setDeletingId(q.id)}
+  className="p-1.5 rounded text-red-500 hover:bg-red-100 transition"
+  title="삭제"
+>
+  <Trash size={16} />
+</button>
                 </li>
               ))}
             </ul>
