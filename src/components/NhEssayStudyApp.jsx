@@ -508,26 +508,32 @@ export default function NhEssayStudyApp() {
                   )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 mb-3">
-                  <Button
-                    onClick={handlePrev}
-                    className="flex-1 bg-gray-500 hover:bg-gray-600"
-                  >
-                    이전 문제
-                  </Button>
-                  <Button
-                    onClick={() => handleNext(true)}
-                    className="flex-1 bg-green-600 hover:bg-green-700"
-                  >
-                    정답 제출
-                  </Button>
-                  <Button
-                    onClick={() => handleNext(false)}
-                    className="flex-1 bg-blue-500 hover:bg-blue-600"
-                  >
-                    다음 문제(건너뛰기)
-                  </Button>
-                </div>
+                {/* ✅ 2단 구조 버튼 영역 */}
+<div className="flex flex-col gap-3 mb-3">
+  {/* 1단: 정답 제출 버튼 (크게) */}
+  <Button
+    onClick={() => handleNext(true)}
+    className="w-full bg-green-600 hover:bg-green-700 py-3 text-lg font-bold shadow-md active:scale-95 transition"
+  >
+    ✅ 정답 제출
+  </Button>
+
+  {/* 2단: 이전 / 다음 버튼 (작게, 가로 정렬) */}
+  <div className="flex gap-2">
+    <Button
+      onClick={handlePrev}
+      className="flex-1 bg-gray-500 hover:bg-gray-600 py-2 text-sm shadow-sm"
+    >
+      ⬅ 이전 문제
+    </Button>
+    <Button
+      onClick={() => handleNext(false)}
+      className="flex-1 bg-blue-500 hover:bg-blue-600 py-2 text-sm shadow-sm"
+    >
+      다음 문제 ➡
+    </Button>
+  </div>
+</div>
 
                 <div className="mt-4 text-center text-sm text-gray-500">
                   {/* filteredQuizData.length 사용 */}
