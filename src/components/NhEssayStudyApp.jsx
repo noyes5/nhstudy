@@ -383,10 +383,10 @@ export default function NhEssayStudyApp() {
                   {/* 삭제 버튼으로 변경 및 setDeletingId 호출 */}
                   <button
   onClick={() => setDeletingId(q.id)}
-  className="p-1.5 rounded text-red-500 hover:bg-red-100 transition"
+  className="p-1.5 rounded bg-red-600 hover:bg-red-700 text-white transition"
   title="삭제"
 >
-  <Trash size={16} />
+  <Trash size={16} strokeWidth={2} />
 </button>
                 </li>
               ))}
