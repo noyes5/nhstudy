@@ -98,7 +98,10 @@ export default function NhEssayStudyApp() {
     try {
       const res = await fetch(`/api/getQuizData?nickname=${name}`);
       const data = await res.json();
-      if (data.quizData?.length) setQuizData(data.quizData);
+      if (data.quizData?.length) {
+// ✅ 문제를 랜덤으로 섞음 (Fisher-Yates shuffle)
+      const shuffled = [...data.quizData].sort(() => Math.random() - 0.5);
+}
       if (data.bookmarked) setBookmarked(data.bookmarked);
     } catch (e) {
       console.error("불러오기 실패:", e);
