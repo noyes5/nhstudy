@@ -222,7 +222,7 @@ setQuizData(shuffled);
     }
   };
 
-  // 엔터, [, ] 키를 통해서 이전 다음문제 가기기능
+  // 엔터, -, = 키를 통해서 이전 다음문제 가기기능
   useEffect(() => {
     if (editMode || showNicknamePopup) return;
 
@@ -230,10 +230,10 @@ setQuizData(shuffled);
       if (e.key === "Enter") {
         e.preventDefault();
         handleNext(true, e.target.value);
-      } else if (e.key === "[") {
+      } else if (e.key === "-") {
         e.preventDefault();
         handlePrev();
-      } else if (e.key === "]") {
+      } else if (e.key === "=") {
         e.preventDefault();
         handleNext(false);
       }
@@ -513,7 +513,7 @@ setQuizData(shuffled);
                   placeholder="답변 입력..."
                   value={answers[current.id] || ""}
                   onChange={(e) => setAnswers({ ...answers, [current.id]: e.target.value })}
-                  onEnter={(val) => handleNext(true, val)}  // ✅ 최신 입력값 전달
+                  onEnter={(val) => handleNext(true, val)}  // 최신 입력값 전달
                   className="mb-4"
                 />
 
@@ -529,7 +529,7 @@ setQuizData(shuffled);
                   )}
                 </div>
 
-                {/* ✅ 2단 구조 버튼 영역 */}
+                {/* 2단 구조 버튼 영역 */}
 <div className="flex flex-col gap-3 mb-3">
   {/* 1단: 정답 제출 버튼 (크게) */}
   <Button
