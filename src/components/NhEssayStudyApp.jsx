@@ -101,6 +101,7 @@ export default function NhEssayStudyApp() {
       if (data.quizData?.length) {
 // ✅ 문제를 랜덤으로 섞음 (Fisher-Yates shuffle)
       const shuffled = [...data.quizData].sort(() => Math.random() - 0.5);
+setQuizData(shuffled);
 }
       if (data.bookmarked) setBookmarked(data.bookmarked);
     } catch (e) {
