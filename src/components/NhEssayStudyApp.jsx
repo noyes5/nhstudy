@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Star, Trash } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 function Card({ children, className = "" }) {
   return (
@@ -52,6 +53,9 @@ export default function NhEssayStudyApp() {
     answer: "",
   });
 
+  // 문제 인덱스를 uuid 기반으로 바꿈에 따라 기존 id 보완용
+  const normalizeId = (id) => String(id);
+
   // 닉네임 관리
   const [nickname, setNickname] = useState("");
   const [showNicknamePopup, setShowNicknamePopup] = useState(true);
@@ -99,10 +103,10 @@ export default function NhEssayStudyApp() {
       const res = await fetch(`/api/getQuizData?nickname=${name}`);
       const data = await res.json();
       if (data.quizData?.length) {
-// ✅ 문제를 랜덤으로 섞음 (Fisher-Yates shuffle)
-      const shuffled = [...data.quizData].sort(() => Math.random() - 0.5);
-setQuizData(shuffled);
-}
+        // ✅ 문제를 랜덤으로 섞음 (Fisher-Yates shuffle)
+        const shuffled = [...data.quizData].sort(() => Math.random() - 0.5);
+        setQuizData(shuffled);
+      }
       if (data.bookmarked) setBookmarked(data.bookmarked);
     } catch (e) {
       console.error("불러오기 실패:", e);
@@ -147,12 +151,14 @@ setQuizData(shuffled);
       setShowPopup(true);
       setTimeout(() => setShowPopup(false), 700);
 
-      if (!correct && !bookmarked.includes(currentId)) {
+      if (!correct && !bookmarked.some((id) => normalizeId(id) === normalizeId(currentId))) {
         const updated = [...bookmarked, currentId];
         setBookmarked(updated);
         saveQuizData(quizData, updated);
-      } else if (correct && bookmarked.includes(currentId)) {
-        const updated = bookmarked.filter((id) => id !== currentId);
+      } else if (correct && bookmarked.some((id) => normalizeId(id) === normalizeId(currentId))) {
+        const updated = bookmarked.filter(
+          (id) => normalizeId(id) !== normalizeId(currentId)
+        );
         setBookmarked(updated);
         saveQuizData(quizData, updated);
       }
@@ -175,7 +181,7 @@ setQuizData(shuffled);
   };
 
   const handleSelectEdit = (id) => {
-    const q = quizData.find((q) => q.id === id);
+    const q = quizData.find((q) => normalizeId(q.id) === normalizeId(id));
     if (q) {
       setEditingId(id);
       setEditData({
@@ -198,7 +204,15 @@ setQuizData(shuffled);
   };
 
   const handleAddQuestion = () => {
-    const newId = quizData.length ? quizData[quizData.length - 1].id + 1 : 1;
+    // 기존 숫자 ID 중 최대값을 찾음 (숫자 기반 문제도 여전히 가능)
+    const numericIds = quizData
+      .map(q => Number(q.id))
+      .filter(n => !isNaN(n));
+    const maxNumericId = numericIds.length ? Math.max(...numericIds) : 0;
+
+    // 새 문제의 id는 UUID 기반 (혹은 숫자 기반이 남아있으면 그대로 증가)
+    const newId = numericIds.length ? maxNumericId + 1 : uuidv4();
+
     const updated = [...quizData, { id: newId, ...newQuestion }];
     setQuizData(updated);
 
@@ -326,8 +340,8 @@ setQuizData(shuffled);
         <button
           onClick={() =>
             setBookmarked((prev) =>
-              prev.includes(current.id)
-                ? prev.filter((id) => id !== current.id)
+              prev.some((bid) => normalizeId(bid) === normalizeId(current.id))
+                ? prev.filter((bid) => normalizeId(bid) !== normalizeId(current.id))
                 : [...prev, current.id]
             )
           }
@@ -348,37 +362,36 @@ setQuizData(shuffled);
         {/* 카테고리 필터 버튼 */}
         <div className="flex justify-center gap-2 mb-4">
           {["전체", ...CATEGORIES].map((cat) => {
-  const base =
-    "px-3 py-1 text-sm font-semibold text-white transition rounded";
-  let activeColor = "";
-  let inactiveColor = "bg-gray-300 text-gray-700 hover:bg-gray-400";
+            const base =
+              "px-3 py-1 text-sm font-semibold text-white transition rounded";
+            let activeColor = "";
+            let inactiveColor = "bg-gray-300 text-gray-700 hover:bg-gray-400";
 
-  if (cat === "전체") activeColor = "bg-gray-700 hover:bg-gray-800";
-  if (cat === "농업") activeColor = "bg-green-600 hover:bg-green-700";
-  if (cat === "IT") activeColor = "bg-blue-600 hover:bg-blue-700";
+            if (cat === "전체") activeColor = "bg-gray-700 hover:bg-gray-800";
+            if (cat === "농업") activeColor = "bg-green-600 hover:bg-green-700";
+            if (cat === "IT") activeColor = "bg-blue-600 hover:bg-blue-700";
 
-  const icons = {
-    전체: "📚",
-    농업: "🌾",
-    IT: "💻",
-  };
+            const icons = {
+              전체: "📚",
+              농업: "🌾",
+              IT: "💻",
+            };
 
-  return (
-    <Button
-      key={cat}
-      onClick={() => {
-        setSelectedCategory(cat);
-        setStep(0);
-        setRevealAnswer(false);
-      }}
-      className={`${base} ${
-        selectedCategory === cat ? activeColor : inactiveColor
-      }`}
-    >
-      {icons[cat]} {cat}
-    </Button>
-  );
-})}
+            return (
+              <Button
+                key={cat}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setStep(0);
+                  setRevealAnswer(false);
+                }}
+                className={`${base} ${selectedCategory === cat ? activeColor : inactiveColor
+                  }`}
+              >
+                {icons[cat]} {cat}
+              </Button>
+            );
+          })}
         </div>
 
         {editMode ? (
@@ -402,12 +415,12 @@ setQuizData(shuffled);
                   </span>
                   {/* 삭제 버튼으로 변경 및 setDeletingId 호출 */}
                   <button
-  onClick={() => setDeletingId(q.id)}
-  className="p-1.5 rounded bg-red-600 hover:bg-red-700 text-white transition"
-  title="삭제"
->
-  <Trash size={16} strokeWidth={2} />
-</button>
+                    onClick={() => setDeletingId(q.id)}
+                    className="p-1.5 rounded bg-red-600 hover:bg-red-700 text-white transition"
+                    title="삭제"
+                  >
+                    <Trash size={16} strokeWidth={2} />
+                  </button>
                 </li>
               ))}
             </ul>
@@ -530,31 +543,31 @@ setQuizData(shuffled);
                 </div>
 
                 {/* 2단 구조 버튼 영역 */}
-<div className="flex flex-col gap-3 mb-3">
-  {/* 1단: 정답 제출 버튼 (크게) */}
-  <Button
-    onClick={() => handleNext(true)}
-    className="w-full bg-green-600 hover:bg-green-700 py-3 text-lg font-bold shadow-md active:scale-95 transition"
-  >
-    ✅ 정답 제출
-  </Button>
+                <div className="flex flex-col gap-3 mb-3">
+                  {/* 1단: 정답 제출 버튼 (크게) */}
+                  <Button
+                    onClick={() => handleNext(true)}
+                    className="w-full bg-green-600 hover:bg-green-700 py-3 text-lg font-bold shadow-md active:scale-95 transition"
+                  >
+                    ✅ 정답 제출
+                  </Button>
 
-  {/* 2단: 이전 / 다음 버튼 (작게, 가로 정렬) */}
-  <div className="flex gap-2">
-    <Button
-      onClick={handlePrev}
-      className="flex-1 bg-gray-500 hover:bg-gray-600 py-2 text-sm shadow-sm"
-    >
-      ⬅ 이전 문제
-    </Button>
-    <Button
-      onClick={() => handleNext(false)}
-      className="flex-1 bg-blue-500 hover:bg-blue-600 py-2 text-sm shadow-sm"
-    >
-      다음 문제 ➡
-    </Button>
-  </div>
-</div>
+                  {/* 2단: 이전 / 다음 버튼 (작게, 가로 정렬) */}
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handlePrev}
+                      className="flex-1 bg-gray-500 hover:bg-gray-600 py-2 text-sm shadow-sm"
+                    >
+                      ⬅ 이전 문제
+                    </Button>
+                    <Button
+                      onClick={() => handleNext(false)}
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 py-2 text-sm shadow-sm"
+                    >
+                      다음 문제 ➡
+                    </Button>
+                  </div>
+                </div>
 
                 <div className="mt-4 text-center text-sm text-gray-500">
                   {/* filteredQuizData.length 사용 */}
