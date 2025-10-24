@@ -400,7 +400,8 @@ export default function NhEssayStudyApp() {
               {selectedCategory === "전체" ? "전체" : selectedCategory} 문제
               목록
             </h2>
-            <ul className="border rounded p-3 max-h-48 overflow-y-auto bg-white/70 mb-4">
+            <ul key={`${selectedCategory}-${editMode}`}
+              className="border rounded p-3 max-h-48 overflow-y-auto bg-white/70 mb-4">
               {/* filteredQuizData 사용 */}
               {filteredQuizData.map((q) => (
                 <li
