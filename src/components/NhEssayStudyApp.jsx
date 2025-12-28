@@ -30,7 +30,7 @@ function Button({ children, onClick, className = "" }) {
   );
 }
 
-const CATEGORIES = ["농업", "IT"];
+const CATEGORIES = ["농업", "IT", "연수"];
 
 export default function NhEssayStudyApp() {
   const [quizData, setQuizData] = useState([]);
@@ -370,11 +370,13 @@ export default function NhEssayStudyApp() {
             if (cat === "전체") activeColor = "bg-gray-700 hover:bg-gray-800";
             if (cat === "농업") activeColor = "bg-green-600 hover:bg-green-700";
             if (cat === "IT") activeColor = "bg-blue-600 hover:bg-blue-700";
+            if (cat === "연수") activeColor = "bg-orange-600 hover:bg-orange-700";
 
             const icons = {
               전체: "📚",
               농업: "🌾",
               IT: "💻",
+              연수: "🏢"
             };
 
             return (
