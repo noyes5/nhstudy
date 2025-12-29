@@ -356,7 +356,7 @@ export default function NhEssayStudyApp() {
         </button>
 
         <h1 className="text-2xl font-bold text-green-800 mb-4 text-center">
-          🌾 2025 농협 논술 암기 페이지
+          🌾 2025 농협 암기 페이지
         </h1>
 
         {/* 카테고리 필터 버튼 */}
