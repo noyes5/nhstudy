@@ -338,16 +338,18 @@ export default function NhEssayStudyApp() {
         </button>
 
         <button
-          onClick={() =>
-            setBookmarked((prev) =>
-              prev.some((bid) => normalizeId(bid) === normalizeId(current.id))
-                ? prev.filter((bid) => normalizeId(bid) !== normalizeId(current.id))
-                : [...prev, current.id]
-            )
-          }
-          className={`absolute top-4 right-4 ${bookmarked.includes(current.id)
-            ? "text-yellow-400"
-            : "text-gray-300"
+          onClick={() => {
+            const isBookmarked = bookmarked.some(
+              (bid) => normalizeId(bid) === normalizeId(current.id)
+            );
+            const updatedBookmarked = isBookmarked
+              ? bookmarked.filter((bid) => normalizeId(bid) !== normalizeId(current.id))
+              : [...bookmarked, current.id];
+
+            setBookmarked(updatedBookmarked);
+            saveQuizData(quizData, updatedBookmarked); // 저장 함수 호출 추가
+          }}
+          className={`absolute top-4 right-4 ${bookmarked.includes(current.id) ? "text-yellow-400" : "text-gray-300"
             }`}
         >
           <Star
